@@ -2,7 +2,12 @@ package ch.tanchuca.daa_labo4
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import androidx.lifecycle.lifecycleScope
 import ch.tanchuca.daa_labo4.databinding.ActivityMainBinding
 
@@ -20,5 +25,22 @@ class MainActivity : AppCompatActivity() {
 
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = GridLayoutManager(this, 3)
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?) : Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.main_menu_empty_cache -> {
+                val workManager = WorkManager.getInstance(applicationContext)
+                val myWorkRequest = OneTimeWorkRequestBuilder<CacheCleaningWork>().build()
+                workManager.enqueue(myWorkRequest)
+                return true
+            }
+            else-> super.onOptionsItemSelected(item) }
     }
 }

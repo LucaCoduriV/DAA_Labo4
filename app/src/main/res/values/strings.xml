@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">DAA_Labo4</string>
     <string name="image_desc">number</string>
+    <string name="main_menu_empty_cache">Action to empty cache</string>
 </resources>
