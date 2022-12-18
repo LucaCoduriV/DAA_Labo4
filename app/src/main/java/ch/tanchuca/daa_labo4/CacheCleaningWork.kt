@@ -1,22 +1,24 @@
 package ch.tanchuca.daa_labo4
 
 import android.content.Context
-import androidx.work.Worker
+import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import java.io.File
+import java.io.IOException
 
-class CacheCleaningWork(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams) {
+class CacheCleaningWork(appContext: Context, workerParams: WorkerParameters) : CoroutineWorker(appContext, workerParams) {
 
-    private val imageDir = "/img/"
+    private val imagesCacheDir = File(appContext.cacheDir, "images")
 
-    override fun doWork(): Result {
+    override suspend fun doWork(): Result = CoroutineScope(Dispatchers.IO).run {
         // Empty local cache
-        val cacheDir = applicationContext.cacheDir
-        for (file in cacheDir.listFiles()!!) {
-            if (file.isDirectory && file.name.equals(imageDir)) {
-                file.listFiles()?.forEach { it.delete() }
-            }
+        try {
+            imagesCacheDir.listFiles()?.forEach { it.delete() }
+        } catch (e: IOException) {
+            return Result.failure()
         }
-        cacheDir.listFiles()?.forEach { it.delete() }
         return Result.success()
     }
 }

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.io.IOException
 import java.net.URL
 
@@ -30,12 +31,38 @@ class ImagesViewAdapter(private var lifecycle: LifecycleCoroutineScope) : Recycl
 
     inner class ViewHolder(private var view: View) : RecyclerView.ViewHolder(view) {
         var image = view.findViewById<ImageView>(R.id.imageView)
+        val imagesCacheDir = File(view.context.cacheDir, "images")
+
+        init {
+            // Création du folder image dans le cache
+            imagesCacheDir.mkdirs()
+        }
 
         fun bind(position: Int){
-            var url = URL("https://daa.iict.ch/images/$position.jpg")
+            val url = URL("https://daa.iict.ch/images/$position.jpg")
             lifecycle.launch {
-                val bytes = downloadImage(url)
+
+                val file = File(imagesCacheDir, "$position.jpg")
+                var shouldCache = false
+
+                // Si l'image n'est pas dans le cache ou a été téléchargée il y a plus de 5 minutes
+                // on la télécharge
+                val bytes = if (!file.exists()
+                    || System.currentTimeMillis() - file.lastModified() > 5 * 60 * 1000) {
+                    shouldCache = true
+                    downloadImage(url)
+                }
+                // Sinon on la lit depuis le cache
+                else {
+                    file.readBytes()
+                }
                 val bmp = decodeImage(bytes)
+
+                if (shouldCache) {
+                    //println("Caching image $position")
+                    cacheImage(bmp, position)
+                }
+
                 displayImage(bmp)
             }
         }
@@ -62,6 +89,19 @@ class ImagesViewAdapter(private var lifecycle: LifecycleCoroutineScope) : Recycl
             image.setImageBitmap(bmp)
             else{
                 image.setImageResource(android.R.color.transparent)
+            }
+        }
+
+        suspend fun cacheImage(bmp : Bitmap?, position: Int) = withContext(Dispatchers.IO) {
+            try {
+                val file = File(imagesCacheDir, "$position.jpg")
+                file.outputStream().use {
+                    // TODO: compresser l'image dans un thread Dispatcher.Default ? ou alors écrire directement le byteArray dans le fichier ?
+                    bmp?.compress(Bitmap.CompressFormat.JPEG, 100, it)
+                    it.flush()
+                }
+            } catch (e: IOException) {
+                println("Exception while caching image" + e.message)
             }
         }
     }
