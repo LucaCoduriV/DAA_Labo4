@@ -82,7 +82,7 @@ class ImagesViewAdapter(private var lifecycle: LifecycleCoroutineScope) : Recycl
             }
         }
         suspend fun downloadImage(url : URL) : ByteArray? = withContext(Dispatchers.IO) {
-            Thread.sleep(2_000)
+            Thread.sleep(10_000)
             try {
                 url.readBytes()
             } catch (e: IOException) {

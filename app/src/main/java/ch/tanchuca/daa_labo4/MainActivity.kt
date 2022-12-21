@@ -6,14 +6,15 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import androidx.lifecycle.lifecycleScope
+import androidx.work.*
 import ch.tanchuca.daa_labo4.databinding.ActivityMainBinding
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
     private val adapter = ImagesViewAdapter(lifecycleScope)
+    private val workManager = WorkManager.getInstance(applicationContext)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +27,17 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = GridLayoutManager(this, 3)
 
+        val constraints = Constraints.Builder()
+            .setRequiresCharging(false)
+            .setRequiresBatteryNotLow(false)
+            .setRequiresDeviceIdle(true)
+            .build()
+        val periodicCacheCleaning = PeriodicWorkRequestBuilder<CacheCleaningWork>(15, TimeUnit.MINUTES)
+            .setConstraints(constraints)
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+            .build()
+        workManager.enqueue(periodicCacheCleaning);
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?) : Boolean {
@@ -36,7 +48,6 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.main_menu_empty_cache -> {
-                val workManager = WorkManager.getInstance(applicationContext)
                 val myWorkRequest = OneTimeWorkRequestBuilder<CacheCleaningWork>().build()
                 workManager.enqueue(myWorkRequest)
                 adapter.notifyDataSetChanged()
