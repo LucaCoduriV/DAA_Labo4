@@ -10,39 +10,41 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.File
 import java.io.IOException
 import java.net.URL
 
 class ImagesViewAdapter(private var lifecycle: LifecycleCoroutineScope) : RecyclerView.Adapter<ImagesViewAdapter.ViewHolder>() {
-
+    private val viewHolders = mutableListOf<ViewHolder>()
     var items : List<Int> = listOf(1.. 10000).flatten()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.pic_item, parent, false))
     }
 
+    fun getViewHolders(): List<ViewHolder> {
+        return viewHolders
+    }
+
     override fun getItemCount() = items.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        viewHolders.add(holder)
         holder.bind(position)
     }
 
     override fun onViewRecycled(holder: ViewHolder) {
         super.onViewRecycled(holder)
-        holder.job?.cancel()
-        Log.println(Log.INFO, "STOP", holder.image.id.toString())
+        holder.stopLoading()
+        viewHolders.remove(holder)
     }
 
     inner class ViewHolder(private var view: View) : RecyclerView.ViewHolder(view) {
         var image = view.findViewById<ImageView>(R.id.imageView)
         var progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
         val imagesCacheDir = File(view.context.cacheDir, "images")
-        var job : Job? = null
+        private var job : Job? = null
 
         init {
             // Création du folder image dans le cache
@@ -62,6 +64,9 @@ class ImagesViewAdapter(private var lifecycle: LifecycleCoroutineScope) : Recycl
                 Log.println(Log.INFO, "LOADS", position.toString())
                 // Si l'image n'est pas dans le cache ou a été téléchargée il y a plus de 5 minutes
                 // on la télécharge
+                if (!isActive) {
+                    return@launch
+                }
                 val bytes = if (!file.exists()
                     || System.currentTimeMillis() - file.lastModified() > 5 * 60 * 1000) {
                     shouldCache = true
@@ -121,6 +126,10 @@ class ImagesViewAdapter(private var lifecycle: LifecycleCoroutineScope) : Recycl
             } catch (e: IOException) {
                 println("Exception while caching image" + e.message)
             }
+        }
+
+        fun stopLoading() {
+            job?.cancel()
         }
     }
 
