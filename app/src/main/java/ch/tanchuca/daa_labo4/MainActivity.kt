@@ -30,7 +30,9 @@ class MainActivity : AppCompatActivity() {
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
             .build()
         val workManager = WorkManager.getInstance(this)
-        workManager.enqueue(periodicCacheCleaning);
+        workManager.enqueueUniquePeriodicWork("periodicCacheCleaning",
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicCacheCleaning);
 
     }
 
