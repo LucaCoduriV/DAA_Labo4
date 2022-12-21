@@ -13,6 +13,7 @@ class CacheCleaningWork(appContext: Context, workerParams: WorkerParameters) : C
     private val imagesCacheDir = File(appContext.cacheDir, "images")
 
     override suspend fun doWork(): Result = CoroutineScope(Dispatchers.IO).run {
+        println("Cleaning cache")
         // Empty local cache
         try {
             imagesCacheDir.listFiles()?.forEach { it.delete() }
