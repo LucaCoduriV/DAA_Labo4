@@ -6,7 +6,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.lifecycle.lifecycleScope
 import androidx.work.*
 import ch.tanchuca.daa_labo4.databinding.ActivityMainBinding
 import java.util.concurrent.TimeUnit
