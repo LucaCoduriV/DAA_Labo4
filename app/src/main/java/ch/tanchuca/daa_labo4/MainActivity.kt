@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
                 val workManager = WorkManager.getInstance(applicationContext)
                 val myWorkRequest = OneTimeWorkRequestBuilder<CacheCleaningWork>().build()
                 workManager.enqueue(myWorkRequest)
+                adapter.notifyDataSetChanged()
                 return true
             }
             else-> super.onOptionsItemSelected(item) }
