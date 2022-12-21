@@ -11,6 +11,7 @@ import android.widget.ProgressBar
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -31,10 +32,17 @@ class ImagesViewAdapter(private var lifecycle: LifecycleCoroutineScope) : Recycl
         holder.bind(position)
     }
 
+    override fun onViewRecycled(holder: ViewHolder) {
+        super.onViewRecycled(holder)
+        holder.job?.cancel()
+        Log.println(Log.INFO, "STOP", holder.image.id.toString())
+    }
+
     inner class ViewHolder(private var view: View) : RecyclerView.ViewHolder(view) {
         var image = view.findViewById<ImageView>(R.id.imageView)
         var progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
         val imagesCacheDir = File(view.context.cacheDir, "images")
+        var job : Job? = null
 
         init {
             // Création du folder image dans le cache
@@ -42,8 +50,11 @@ class ImagesViewAdapter(private var lifecycle: LifecycleCoroutineScope) : Recycl
         }
 
         fun bind(position: Int){
+            image.visibility = View.GONE
+            progressBar.visibility = View.VISIBLE
+
             val url = URL("https://daa.iict.ch/images/$position.jpg")
-            lifecycle.launch {
+            job = lifecycle.launch {
 
                 val file = File(imagesCacheDir, "$position.jpg")
                 var shouldCache = false
