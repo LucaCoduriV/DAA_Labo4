@@ -55,4 +55,12 @@ class MainActivity : AppCompatActivity() {
             }
             else-> super.onOptionsItemSelected(item) }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        var viewHolders = adapter.getViewHolders()
+        viewHolders.forEach {
+            it.stopLoading()
+        }
+    }
 }
