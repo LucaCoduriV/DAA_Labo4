@@ -15,6 +15,8 @@ Lors du bind d'un élément à son layout, nous ajoutons son view holder à une 
 ### 3.3 
 > Est-ce que l’utilisation du Dispatchers.IO est le plus adapté pour des tâches de téléchargement ? Ne faudrait-il pas plutôt utiliser un autre Dispatcher, si oui lequel ? Veuillez illustrer votre réponse en effectuant quelques tests.
 
+Le Dispatcher.IO est le plus adapté pour les tâches de téléchargement.
+
 ### 4.1 
 > Lors du lancement de la tâche ponctuelle, comment pouvons nous faire en sorte que la galerie soit raffraîchie ?
 
