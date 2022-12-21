@@ -2,6 +2,7 @@ package ch.tanchuca.daa_labo4
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,6 +48,7 @@ class ImagesViewAdapter(private var lifecycle: LifecycleCoroutineScope) : Recycl
                 val file = File(imagesCacheDir, "$position.jpg")
                 var shouldCache = false
 
+                Log.println(Log.INFO, "LOADS", position.toString())
                 // Si l'image n'est pas dans le cache ou a été téléchargée il y a plus de 5 minutes
                 // on la télécharge
                 val bytes = if (!file.exists()
@@ -69,6 +71,7 @@ class ImagesViewAdapter(private var lifecycle: LifecycleCoroutineScope) : Recycl
             }
         }
         suspend fun downloadImage(url : URL) : ByteArray? = withContext(Dispatchers.IO) {
+            Thread.sleep(2_000)
             try {
                 url.readBytes()
             } catch (e: IOException) {
