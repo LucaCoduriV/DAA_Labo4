@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +32,7 @@ class ImagesViewAdapter(private var lifecycle: LifecycleCoroutineScope) : Recycl
 
     inner class ViewHolder(private var view: View) : RecyclerView.ViewHolder(view) {
         var image = view.findViewById<ImageView>(R.id.imageView)
+        var progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
         val imagesCacheDir = File(view.context.cacheDir, "images")
 
         init {
@@ -90,6 +92,8 @@ class ImagesViewAdapter(private var lifecycle: LifecycleCoroutineScope) : Recycl
             else{
                 image.setImageResource(android.R.color.transparent)
             }
+            progressBar.visibility = View.GONE
+            image.visibility = View.VISIBLE
         }
 
         suspend fun cacheImage(bmp : Bitmap?, position: Int) = withContext(Dispatchers.IO) {
